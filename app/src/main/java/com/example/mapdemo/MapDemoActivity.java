@@ -35,7 +35,13 @@ public class MapDemoActivity extends FragmentActivity implements
 	private LocationRequest mLocationRequest;
 	private long UPDATE_INTERVAL = 60000;  /* 60 secs */
 	private long FASTEST_INTERVAL = 5000; /* 5 secs */
-
+	static final Double EARTH_RADIUS = 6371.00;
+	double lat_old=0.0;
+	double lon_old=0.0;
+	double lat_new;
+	double lon_new;
+	double time=1.44;
+	double speed=0.0;
 	/*
 	 * Define a request code to send to Google Play services This code is
 	 * returned in Activity.onActivityResult
@@ -48,6 +54,8 @@ public class MapDemoActivity extends FragmentActivity implements
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map_demo_activity);
+
+
 
 		mapFragment = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map));
 
@@ -190,17 +198,55 @@ public class MapDemoActivity extends FragmentActivity implements
 
     public void onLocationChanged(Location location) {
         // Report to the UI that the location was updated
+		/*float speed = location.getSpeed();
+
         String msg = "Updated Location: " +
-                Double.toString(location.getLatitude()) + "," +
-                Double.toString(location.getLongitude());
+                Double.toString(location.getLatitude()) + "-" +
+                Double.toString(location.getLongitude()) +  "-" +
+				Double.toString(speed);
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+*/
+		if(location!=null){
 
-    }
+			//String Speed = "Device Speed: " +location.getSpeed();
+			lat_new=location.getLongitude();
+			lon_new =location.getLatitude();
+			String longitude = "Longitude: " +location.getLongitude();
+			String latitude = "Latitude: " +location.getLatitude();
+			double distance =CalculationByDistance(lat_new, lon_new, lat_old, lon_old);
+			speed = distance/time;
+			Toast.makeText(getApplicationContext(), longitude+"\n"+latitude+"\nDistance is: "
+					+distance+"\nSpeed is: "+speed , Toast.LENGTH_SHORT).show();
+			lat_old=lat_new;
+			lon_old=lon_new;
 
-    /*
+		}
+		}
+
+
+	 public double CalculationByDistance(double lat1, double lon1, double lat2, double lon2) {
+		double Radius = EARTH_RADIUS;
+		double dLat = Math.toRadians(lat2-lat1);
+		double dLon = Math.toRadians(lon2-lon1);
+		double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+				Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+						Math.sin(dLon/2) * Math.sin(dLon/2);
+		double c = 2 * Math.asin(Math.sqrt(a));
+		return Radius * c;
+	}
+
+
+
+
+
+
+
+/*
      * Called by Location Services if the connection to the location client
      * drops because of an error.
-     */
+  */
+
+
     @Override
     public void onConnectionSuspended(int i) {
         if (i == CAUSE_SERVICE_DISCONNECTED) {
